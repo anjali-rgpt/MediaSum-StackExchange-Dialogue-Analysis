@@ -7,7 +7,6 @@ bleach==4.1.0
 blis==0.7.5
 bs4==0.0.1
 catalogue==2.0.6
-ca-certificates==2021.10.26
 certifi==2021.10.8
 cffi==1.15.0
 charset-normalizer==2.0.9
