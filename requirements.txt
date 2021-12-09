@@ -83,8 +83,6 @@ PyYAML==6.0
 pyzmq==22.3.0
 regex==2021.11.10
 requests==2.26.0
-sacred==0.8.2
-sacremoses==0.0.46
 scikit-learn==1.0.1
 scipy==1.7.3
 Send2Trash==1.8.0
@@ -105,8 +103,6 @@ thinc==8.0.13
 threadpoolctl==3.0.0
 tokenizers==0.10.3
 tomli==1.2.2
-torch==1.10.0
-torchvision==0.11.1
 tornado==6.1
 tqdm==4.62.3
 traitlets==5.1.1
