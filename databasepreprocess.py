@@ -6,7 +6,7 @@ import re
 import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, FastText
 from scipy import spatial
 
 regular_expression = re.compile('[' + re.escape('!@#$^&*\'()+=-_,./:;<>?"[\\]^_`{|}~')+'\\r\\t\\n]')
@@ -82,7 +82,7 @@ def retrieve_db():
         db_new.drop(['cluster_id', 'order'], axis = 1, inplace = True)
         db_new.to_csv('database.csv')
 
-        model = Word2Vec.load('models\word2vecmodel.model')
+        model = FastText.load('models\\fasttextmodel.model')
 
         document_vectors_q1 = pd.DataFrame()
         for document in db_new['preprocessed_q1']:

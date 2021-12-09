@@ -1,4 +1,4 @@
-from gensim.models import Word2Vec
+from gensim.models import Word2Vec, FastText
 import numpy as np
 import pandas as pd
 import sys
@@ -54,8 +54,8 @@ def locate():
         # file1 = open('models/sem_sim_gaussian_nb.pickle', 'rb')
         # model1 = pickle.load(file1)
         booster_model = xgb.Booster({'nthread': 4})  # init model
-        booster_model.load_model('models/xgbooster.model')
-        w2vmodel = Word2Vec.load('models/word2vecmodel.model')
+        booster_model.load_model('models\\xgbooster.model')
+        w2vmodel = FastText.load('models\\fasttextmodel.model')
         db, other = dbp.retrieve_db()
 
         preprocessed_query = dbp.preprocess_data(query)
