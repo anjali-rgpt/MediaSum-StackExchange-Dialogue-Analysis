@@ -7,7 +7,7 @@ import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from gensim.models import Word2Vec
-from sklearn.metrics import cosine_similarity
+from scipy import spatial
 
 regular_expression = re.compile('[' + re.escape('!@#$^&*\'()+=-_,./:;<>?"[\\]^_`{|}~')+'\\r\\t\\n]')
 stopwords_eng = stopwords.words('english')
@@ -44,7 +44,7 @@ def preprocess_data(data, remove_characters = regular_expression, stopwords_list
 def get_cosine_simlarity(record):
     v1 = record.iloc[0:32]
     v2 = record.iloc[32:64]
-    return cosine_similarity(v1, v2)
+    return spatial.distance.cosine(v1, v2)
 
 def find_common_words(record):
     
@@ -65,11 +65,11 @@ def find_shared_ratio(record):
         intersect_words = len(record['shared_words'])
     return intersect_words / record['total_words']
 
-if __name__ == '__main__':    
+def retrieve_db():    
     try:
         database = pd.read_csv('databasex.csv')
         other_columns = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
-        #return database, other_columns
+        return database, other_columns
 
     except:
         out = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True)
@@ -93,4 +93,5 @@ if __name__ == '__main__':
             document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
         document_vectors_q1.to_csv('database_encoded.csv')
         print("Encoded.")
+        return db_new, document_vectors_q1
 

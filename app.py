@@ -10,8 +10,6 @@ import databasepreprocess as dbp
 import pickle
 import xgboost as xgb
 
-
-
 app = Flask(__name__)
 app.debug = True
 
@@ -57,7 +55,7 @@ def locate():
         # model1 = pickle.load(file1)
         booster_model = xgb.Booster({'nthread': 4})  # init model
         booster_model.load_model('models/xgbooster.model')
-        w2vmodel = Word2Vec.load('word2vecmodel.model')
+        w2vmodel = Word2Vec.load('models/word2vecmodel.model')
         db, other = dbp.retrieve_db()
 
         preprocessed_query = dbp.preprocess_data(query)
