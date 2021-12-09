@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Transcript Analysis</title>
+        <script>
+            function validateType(){
+                var fileInput = document.getElementById("fileUploaded");
+                var pathValue = fileInput.value;
+                var allowedExtensions = /(\.json)$/i;
+                if (!allowedExtensions.exec(pathValue)) {
+                    alert('Invalid file type');
+                    fileInput.value = '';
+                    return false;
+                 }
+                 else{
+                     return true;
+                 }
+                }
+
+        </script>
+    </head>
+
+    <body>
+        <form action = "{{ url_for('analyse') }}" method = "POST" onsubmit="return validateType()" enctype=multipart/form-data>
+            <input name = "fileUploaded" id = "fileUploaded" type = "file"><br>
+            <input name = "submit" type = "submit">
+        </form>
+    </body>
+</html>

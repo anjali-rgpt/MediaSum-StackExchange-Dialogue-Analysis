@@ -1,0 +1,26 @@
+<html>
+
+<head>
+    <title>Similarity checking in database</title>
+    <script>
+        function validate() {
+            var textInput = document.getElementById("query");
+            var textvalue = textInput.value;
+            if (textvalue.slice(-1) == '?') {
+                return true;
+            } else {
+                alert("Not a question.")
+                return false;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <form action="{{ url_for('locate') }}" method="POST" onsubmit="return validate()" enctype=multipart/form-data>
+        <input name="query" id="query" type="text"><br>
+        <input name="submit" type="submit">
+    </form>
+</body>
+
+</html>

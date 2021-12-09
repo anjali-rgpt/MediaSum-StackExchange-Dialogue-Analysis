@@ -1,0 +1,37 @@
+<html>
+    <head><title>Report</title>
+    <style>
+        table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+        }
+
+    </style></head>
+
+    <body>
+        <h1>Report</h1>
+        {% set results = result_data %}
+        {% for item in results.keys() %}
+            <h4>Transcript {{ item }} </h4>
+            {% set reportdata = results[item] %}
+            <table>
+                <tr>
+                    {% for key in reportdata.keys() %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for val in reportdata.values() %}
+                        <td>{{ val }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+            <br>
+            <h2>Word Clouds for Key Themes in Summaries</h2>
+            {% set topics = topic_model_results[item] %}
+            {% for image in topics %}
+            <img src = '{{ image }}'/>
+            {% endfor %}
+        {% endfor %}
+    </body>
+</html>
