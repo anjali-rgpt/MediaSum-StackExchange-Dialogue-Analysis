@@ -28,7 +28,7 @@
             </table>
             <br>
             <h2>Word Clouds for Key Themes in Summaries</h2>
-            {% set topics = topic_model_results[item] %}
+            {% set topics = topic_data[item] %}
             {% for image in topics %}
             <img src = '{{ image }}'/>
             {% endfor %}

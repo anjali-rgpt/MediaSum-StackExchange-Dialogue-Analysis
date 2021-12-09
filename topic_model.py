@@ -63,7 +63,7 @@ def ctm_model(data, column = 'utt'):
     tp = TopicModelDataPreparation("paraphrase-distilroberta-base-v1")
 
     training_dataset = tp.fit(text_for_contextual= to_process, text_for_bow = preprocessed_list)
-    topics_per_document = [2, 3, 4, 5, 6]
+    topics_per_document = [2, 3, 4, 5]
     best_num = 0
     best_coherence = -9999
     scores_lda = []

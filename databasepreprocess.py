@@ -7,6 +7,7 @@ import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
 from gensim.models import Word2Vec
+from sklearn.metrics import cosine_similarity
 
 regular_expression = re.compile('[' + re.escape('!@#$^&*\'()+=-_,./:;<>?"[\\]^_`{|}~')+'\\r\\t\\n]')
 stopwords_eng = stopwords.words('english')
@@ -39,6 +40,11 @@ def preprocess_data(data, remove_characters = regular_expression, stopwords_list
     # print(split_list)
     temp_data = [word for word in split_list if word not in stopwords_list]
     return temp_data
+
+def get_cosine_simlarity(record):
+    v1 = record.iloc[0:32]
+    v2 = record.iloc[32:64]
+    return cosine_similarity(v1, v2)
 
 def find_common_words(record):
     
