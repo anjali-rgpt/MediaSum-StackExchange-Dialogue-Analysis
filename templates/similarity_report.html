@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>Similar questions Report</title>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Report</h1>
+    {% set results = relevant %}
+    <ol>
+        {% for item in results %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ol>
+</body>
+
+</html>

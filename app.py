@@ -106,7 +106,7 @@ def locate():
         similar_questions = db[db['is_similar'] == 1]
         similar_questions['cosine_similarity'] = db.apply(dbp.get_cosine_simlarity, axis = 1)
         sorted_vals = similar_questions.sort_values(by = 'cosine_similarity', ascending = False)
-        return sorted_vals.head(5)['body_text'].tolist()
+        return render_template('similarity_report.html', relevant = sorted_vals.head(5)['body_text'].tolist())
 
 
 if __name__ == "__main__":
