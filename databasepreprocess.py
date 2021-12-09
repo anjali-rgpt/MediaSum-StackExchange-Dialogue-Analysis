@@ -67,9 +67,10 @@ def find_shared_ratio(record):
 
 def retrieve_db():    
     try:
-        database = pd.read_csv('databasex.csv')
-        other_columns = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
-        return database, other_columns
+        database = pd.read_csv('database.csv')
+        extras = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
+        other_columns = pd.read_csv('database_encoded.csv')
+        return database, other_columns, extras
 
     except:
         out = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True)
@@ -77,8 +78,9 @@ def retrieve_db():
 
         db_new['qid1'] = out['post_id']
         db_new['preprocessed_q1'] = out['body_text'].apply(lambda x: preprocess_data(x))
+        extras = db_new.loc[:,['cluster_id', 'order']]
         db_new.drop(['cluster_id', 'order'], axis = 1, inplace = True)
-        db_new.to_csv('databasex.csv')
+        db_new.to_csv('database.csv')
 
         model = Word2Vec.load('models\word2vecmodel.model')
 
@@ -93,5 +95,5 @@ def retrieve_db():
             document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
         document_vectors_q1.to_csv('database_encoded.csv')
         print("Encoded.")
-        return db_new, document_vectors_q1
+        return db_new, document_vectors_q1, extras
 
