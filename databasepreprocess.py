@@ -70,6 +70,7 @@ def retrieve_db():
         database = pd.read_csv('database.csv')
         extras = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
         other_columns = pd.read_csv('database_encoded.csv')
+        print("Loaded.")
         return database, other_columns, extras
 
     except:
@@ -81,6 +82,7 @@ def retrieve_db():
         extras = db_new.loc[:,['cluster_id', 'order']]
         db_new.drop(['cluster_id', 'order'], axis = 1, inplace = True)
         db_new.to_csv('database.csv')
+        print("Created database")
 
         model = FastText.load('models\\fasttextmodel.model')
 
@@ -94,6 +96,7 @@ def retrieve_db():
             current_vector = temp_vector.mean()
             document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
         document_vectors_q1.to_csv('database_encoded.csv')
+        print(document_vectors_q1.shape)
         print("Encoded.")
         return db_new, document_vectors_q1, extras
 

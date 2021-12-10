@@ -29,7 +29,7 @@ def transcriptpage():
 def simpage():
     return render_template('similarities.html')
 
-@app.route('/analysis', methods = ["POST"])
+@app.route('/analysis', methods = ["POST", "GET"])
 def analyse():
     if request.method == "POST":
         if "fileUploaded" not in request.files:
@@ -55,12 +55,15 @@ def analyse():
 def locate():
     if request.method == 'POST':
         query = request.form['query']
+        print("Query is:", query)
         # file1 = open('models/sem_sim_gaussian_nb.pickle', 'rb')
         # model1 = pickle.load(file1)
         booster_model = xgb.Booster({'nthread': 4})  # init model
         booster_model.load_model('models\\xgbooster.model')
         w2vmodel = FastText.load('models\\fasttextmodel.model')
+        print("All models loaded.")
         db, other = dbp.retrieve_db()
+        print("Retrieved database.")
 
         preprocessed_query = dbp.preprocess_data(query)
         temp_vector = pd.DataFrame()
@@ -69,6 +72,7 @@ def locate():
             embedding = w2vmodel.wv[word]
             temp_vector = temp_vector.append(pd.Series(embedding), ignore_index = True)
         current_vector = pd.DataFrame(temp_vector.mean()).transpose()
+        print("Encoded query")
 
         query_df = pd.concat([current_vector]*len(other), ignore_index = True)
         query_df.columns = ['query_'+ str(col) for col in query_df.columns]
@@ -89,11 +93,13 @@ def locate():
         db['shared_ratio'] = db.apply(dbp.find_shared_ratio, axis = 1)
         db['countq1'] = db['qid1'].apply(lambda x: counts[x])
         db['countq2'] = db['qid2'].apply(lambda x: counts[x])
+        print("Built features")
 
         q1 = pd.DataFrame(other)
         q2 = pd.DataFrame(query_df)
         q1.fillna(-9999, inplace = True)
         q2.fillna(-9999, inplace = True)
+        print("Filled nulls")
 
         numeric_features = db.loc[:, ['shared_ratio','countq1', 'countq2', 'qid1', 'qid2', 'total_words']]
 
