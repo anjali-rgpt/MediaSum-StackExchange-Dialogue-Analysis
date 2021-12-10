@@ -94,7 +94,7 @@ def retrieve_db():
             return database, other_columns, extras
         except:
             model = FastText.load('models\\fasttextmodel.model')
-
+            db_new = database
             document_vectors_q1 = pd.DataFrame()
             for document in db_new['preprocessed_q1']:
                 temp_vector = pd.DataFrame()
@@ -107,6 +107,6 @@ def retrieve_db():
             document_vectors_q1.to_csv('database_encoded.csv')
             print(document_vectors_q1.shape)
             print("Encoded.")
-            db_new = database
+
             return db_new, document_vectors_q1, extras
 
