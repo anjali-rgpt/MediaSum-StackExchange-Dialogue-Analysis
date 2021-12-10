@@ -65,7 +65,12 @@ def find_shared_ratio(record):
         intersect_words = len(record['shared_words'])
     return intersect_words / record['total_words']
 
-def retrieve_db():    
+def retrieve_db(): 
+    database = []
+    extras = []   
+    other_columns = []
+    db_new, document_vectors_q1 = []. []
+
     try:
         database = pd.read_csv('database.csv')
         extras = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
