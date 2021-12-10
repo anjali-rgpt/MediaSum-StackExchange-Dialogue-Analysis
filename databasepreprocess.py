@@ -93,6 +93,7 @@ def retrieve_db():
             print("Loaded.")
             return database, other_columns, extras
         except:
+            print("Encoding not found. Creating.")
             model = FastText.load('models\\fasttextmodel.model')
             db_new = database
             document_vectors_q1 = pd.DataFrame()
