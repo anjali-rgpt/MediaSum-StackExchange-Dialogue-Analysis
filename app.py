@@ -9,9 +9,13 @@ import topic_model as topic_model
 import databasepreprocess as dbp
 import pickle
 import xgboost as xgb
+import os
 
 app = Flask(__name__)
 app.debug = True
+
+IMAGE_FOLDER = os.path.join('outputs')
+app.config['UPLOAD_FOLDER'] = IMAGE_FOLDER
 
 @app.route('/')
 def index():
@@ -42,7 +46,7 @@ def analyse():
             results[i] = preprocess.generate_report(row)
             ctm_transcript, _ = topic_model.ctm_model(row)
             word_images = topic_model.generate_word_cloud(row, ctm_transcript)
-            topic_model_results[i] = word_images
+            topic_model_results[i] = [os.path.join(app.config['UPLOAD_FOLDER'], url) for url in word_images]
             print(word_images)
 
         return render_template("report.html", result_data = results, topic_data = topic_model_results)
@@ -94,6 +98,7 @@ def locate():
         numeric_features = db.loc[:, ['shared_ratio','countq1', 'countq2', 'qid1', 'qid2', 'total_words']]
 
         X = pd.concat((q1, q2, numeric_features), axis = 1)
+        print(X.head())
         test_data = xgb.DMatrix(X)
         ypred = np.round(booster_model.predict(test_data))
 
@@ -104,6 +109,7 @@ def locate():
         similar_questions = db[db['is_similar'] == 1]
         similar_questions['cosine_similarity'] = db.apply(dbp.get_cosine_simlarity, axis = 1)
         sorted_vals = similar_questions.sort_values(by = 'cosine_similarity', ascending = False)
+        print(sorted_vals.head())
         return render_template('similarity_report.html', relevant = sorted_vals.head(5)['body_text'].tolist())
 
 

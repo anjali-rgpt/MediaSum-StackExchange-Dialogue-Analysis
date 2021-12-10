@@ -93,7 +93,7 @@ def generate_word_cloud(data, model, parameter = 10):
     for num_topic in range(len(topic_lists)):
         #plt.title("Topic Cluster " + str(num_topic))
         wc = WordCloud().generate(' '.join(topic_lists[num_topic]))
-        wc.to_file(str(data['id']) + '_Topic_' + str(num_topic) + '.png')
+        wc.to_file('outputs\\'+str(data['id']) + '_Topic_' + str(num_topic) + '.png')
         imagelists.append(str(data['id']) + '_Topic_' + str(num_topic))
         # plt.imshow(wc)
         #plt.axis("off")
