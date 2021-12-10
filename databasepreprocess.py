@@ -69,10 +69,6 @@ def retrieve_db():
     try:
         database = pd.read_csv('database.csv')
         extras = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
-        other_columns = pd.read_csv('database_encoded.csv')
-        print("Loaded.")
-        return database, other_columns, extras
-
     except:
         out = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True)
         db_new = pd.DataFrame(out, columns = out.columns)
@@ -84,19 +80,25 @@ def retrieve_db():
         db_new.to_csv('database.csv')
         print("Created database")
 
-        model = FastText.load('models\\fasttextmodel.model')
+    finally:
+        try:
+            other_columns = pd.read_csv('database_encoded.csv')
+            print("Loaded.")
+            return database, other_columns, extras
+        except:
+            model = FastText.load('models\\fasttextmodel.model')
 
-        document_vectors_q1 = pd.DataFrame()
-        for document in db_new['preprocessed_q1']:
-            temp_vector = pd.DataFrame()
-    
-            for word in document:
-                embedding = model.wv[word]
-                temp_vector = temp_vector.append(pd.Series(embedding), ignore_index = True)
-            current_vector = temp_vector.mean()
-            document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
-        document_vectors_q1.to_csv('database_encoded.csv')
-        print(document_vectors_q1.shape)
-        print("Encoded.")
-        return db_new, document_vectors_q1, extras
+            document_vectors_q1 = pd.DataFrame()
+            for document in db_new['preprocessed_q1']:
+                temp_vector = pd.DataFrame()
+        
+                for word in document:
+                    embedding = model.wv[word]
+                    temp_vector = temp_vector.append(pd.Series(embedding), ignore_index = True)
+                current_vector = temp_vector.mean()
+                document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
+            document_vectors_q1.to_csv('database_encoded.csv')
+            print(document_vectors_q1.shape)
+            print("Encoded.")
+            return db_new, document_vectors_q1, extras
 

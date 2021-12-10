@@ -1,3 +1,4 @@
 pythia/
 .vscode/
 __pycache__/
+models/fasttextmodel.model.wv.vectors_ngrams.py
