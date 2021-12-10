@@ -69,7 +69,7 @@ def retrieve_db():
     database = []
     extras = []   
     other_columns = []
-    db_new, document_vectors_q1 = []. []
+    db_new, document_vectors_q1 = [] , []
 
     try:
         database = pd.read_csv('database.csv')
@@ -83,10 +83,12 @@ def retrieve_db():
         extras = db_new.loc[:,['cluster_id', 'order']]
         db_new.drop(['cluster_id', 'order'], axis = 1, inplace = True)
         db_new.to_csv('database.csv')
+        database = db_new
         print("Created database")
 
     finally:
         try:
+            print("Searching for other columns")
             other_columns = pd.read_csv('database_encoded.csv')
             print("Loaded.")
             return database, other_columns, extras
@@ -105,5 +107,6 @@ def retrieve_db():
             document_vectors_q1.to_csv('database_encoded.csv')
             print(document_vectors_q1.shape)
             print("Encoded.")
+            db_new = database
             return db_new, document_vectors_q1, extras
 
