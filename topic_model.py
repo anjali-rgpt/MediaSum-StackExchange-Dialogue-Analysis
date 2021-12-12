@@ -9,9 +9,12 @@ from contextualized_topic_models.utils.data_preparation import TopicModelDataPre
 from contextualized_topic_models.utils.preprocessing import WhiteSpacePreprocessing
 from contextualized_topic_models.evaluation.measures import CoherenceCV
 import spacy
+import os
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
 from nltk import sent_tokenize
+
+upload_folder = 'static/outputs/'
 
 lemmatizer_model = spacy.load('en_core_web_sm', disable = ['ner', 'parser'])
 pos_tags = ['NN', 'VB', 'JJ']
@@ -44,14 +47,17 @@ def transcript_id(data):
     return data['id']
 
 def ctm_model(data, column = 'utt'):   
+    print("\nNEW ITEM")
     preprocessed_list = []
     
     if type(data) == type(pd.Series([1,2,3])):
         data = pd.DataFrame(data).transpose()
     # print(data[column])
     ngrams_chosen = ngrams(data)
-    if type(data[column][0]) == type([]):
-        to_process = data[column][0]
+    print(type(data[column]))
+    if type(data[column].iloc[0]) == type([]):
+        print(data[column])
+        to_process = data[column].iloc[0]
     else:
         to_process = sent_tokenize(data[column].tolist()[0])
     for item in to_process:
@@ -93,7 +99,9 @@ def generate_word_cloud(data, model, parameter = 10):
     for num_topic in range(len(topic_lists)):
         #plt.title("Topic Cluster " + str(num_topic))
         wc = WordCloud().generate(' '.join(topic_lists[num_topic]))
-        wc.to_file('static\\outputs\\'+str(data['id']) + '_Topic_' + str(num_topic) + '.png')
+        path_val = os.path.join(upload_folder, str(data['id']) + '_Topic_' + str(num_topic) + '.png').replace('%5C','/')
+        print(path_val)
+        wc.to_file(path_val)
         imagelists.append(str(data['id']) + '_Topic_' + str(num_topic)+'.png')
         # plt.imshow(wc)
         #plt.axis("off")

@@ -62,7 +62,7 @@ def locate():
         booster_model.load_model('models\\xgbooster.model')
         w2vmodel = FastText.load('models\\fasttextmodel.model')
         print("All models loaded.")
-        db, other = dbp.retrieve_db()
+        db, encoded_db, other = dbp.retrieve_db()
         print("Retrieved database.")
 
         preprocessed_query = dbp.preprocess_data(query)
@@ -73,20 +73,26 @@ def locate():
             temp_vector = temp_vector.append(pd.Series(embedding), ignore_index = True)
         current_vector = pd.DataFrame(temp_vector.mean()).transpose()
         print("Encoded query")
+        query_preprocessed_df = pd.DataFrame(columns = ['preprocessed_query'])
+        query_preprocessed_df['preprocessed_query'] = [preprocessed_query]*len(db)
+        db = pd.concat([db, query_preprocessed_df], axis = 1)
+        print(db.head())
 
-        query_df = pd.concat([current_vector]*len(other), ignore_index = True)
+        query_df = pd.concat([current_vector]*len(encoded_db), ignore_index = True)
         query_df.columns = ['query_'+ str(col) for col in query_df.columns]
+        print("Query as a dataframe:", query_df.head())
 
         new_index = np.max(db.post_id) + 1
+        print("New index:", new_index)
 
-        query_id = np.array([new_index]*len(db))
+        query_id = [new_index]*len(db)
 
         db['qid2'] = query_id
 
         counts = pd.Series(db['qid1'].tolist() + db['qid2'].tolist()).value_counts()
 
-        db['shared_words'] = db.apply(dbp.find_common_words, axis = 1)
-        db['total_words'] =  db.apply(dbp.find_total_words, axis = 1)
+        db['shared_words'] = db.apply(dbp.find_common_words,  col1 = 'preprocessed_q1', col2 = 'preprocessed_query', axis = 1)
+        db['total_words'] =  db.apply(dbp.find_total_words, col1 = 'preprocessed_q1', col2 = 'preprocessed_query', axis = 1)
         to_drop = db[db['total_words'] == 0].index
         db = db.drop(to_drop, axis = 0)
         db.reset_index(inplace = True)
@@ -95,7 +101,7 @@ def locate():
         db['countq2'] = db['qid2'].apply(lambda x: counts[x])
         print("Built features")
 
-        q1 = pd.DataFrame(other)
+        q1 = pd.DataFrame(encoded_db)
         q2 = pd.DataFrame(query_df)
         q1.fillna(-9999, inplace = True)
         q2.fillna(-9999, inplace = True)
@@ -104,7 +110,8 @@ def locate():
         numeric_features = db.loc[:, ['shared_ratio','countq1', 'countq2', 'qid1', 'qid2', 'total_words']]
 
         X = pd.concat((q1, q2, numeric_features), axis = 1)
-        print(X.head())
+        print("Full dataset:\n", X.head(), X.columns)
+        X.drop('Unnamed: 0', axis = 1, inplace = True)
         test_data = xgb.DMatrix(X)
         ypred = np.round(booster_model.predict(test_data))
 

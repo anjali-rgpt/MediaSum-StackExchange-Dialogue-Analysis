@@ -30,6 +30,7 @@
             <h2>Word Clouds for Key Themes in Summaries</h2>
             {% set topics = topic_data[item] %}
             {% for image in topics %}
+                <p>{{ image }}</p>
                 <img src = '{{ url_for('static', filename='outputs/' + image) }}' alt = 'Topic Cloud for Transcript {{ item }}'>
             {% endfor %}
         {% endfor %}

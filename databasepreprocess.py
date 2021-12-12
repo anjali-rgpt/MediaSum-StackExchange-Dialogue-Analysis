@@ -46,16 +46,16 @@ def get_cosine_simlarity(record):
     v2 = record.iloc[32:64]
     return spatial.distance.cosine(v1, v2)
 
-def find_common_words(record):
+def find_common_words(record, col1, col2):
     
-    q1 = set(record['preprocessed_q1'])
-    q2 = set(record['preprocessed_q2'])
+    q1 = set(record[col1])
+    q2 = set(record[col2])
     return q1 & q2
 
-def find_total_words(record):
+def find_total_words(record, col1, col2):
         
-    q1 = set(record['preprocessed_q1'])
-    q2 = set(record['preprocessed_q2'])
+    q1 = set(record[col1])
+    q2 = set(record[col2])
     return len(q1) + len(q2)
     
 def find_shared_ratio(record):
@@ -74,6 +74,7 @@ def retrieve_db():
     try:
         database = pd.read_csv('database.csv')
         extras = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True).loc[:, ['cluster_id', 'order']]
+        print("Loaded database")
     except:
         out = load_into_pandas('pythia\\stack_exchange_data\\', lines_arg = True)
         db_new = pd.DataFrame(out, columns = out.columns)
@@ -89,11 +90,12 @@ def retrieve_db():
     finally:
         try:
             print("Searching for other columns")
-            other_columns = pd.read_csv('database_encoded.csv')
+            encoded_columns = pd.read_csv('database_encoded.csv')
             print("Loaded.")
-            return database, other_columns, extras
+            return database, encoded_columns, extras
         except:
             print("Encoding not found. Creating.")
+            counter = 0
             model = FastText.load('models\\fasttextmodel.model')
             db_new = database
             document_vectors_q1 = pd.DataFrame()
@@ -105,6 +107,10 @@ def retrieve_db():
                     temp_vector = temp_vector.append(pd.Series(embedding), ignore_index = True)
                 current_vector = temp_vector.mean()
                 document_vectors_q1 = document_vectors_q1.append(current_vector, ignore_index = True)
+                counter+=1
+                if counter % 1000 == 0:
+                    print(counter)
+                    
             document_vectors_q1.to_csv('database_encoded.csv')
             print(document_vectors_q1.shape)
             print("Encoded.")
