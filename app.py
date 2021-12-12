@@ -118,9 +118,11 @@ def locate():
         db['is_similar'] = ypred
 
         print("Number of relevant questions:", np.sum(db.is_similar))
-
         similar_questions = db[db['is_similar'] == 1]
-        similar_questions['cosine_similarity'] = db.apply(dbp.get_cosine_simlarity, axis = 1)
+        if np.sum(db.is_similar) == 0:
+            similar_questions = db
+        similar_questions['cosine_similarity'] = similar_questions.apply(dbp.get_cosine_simlarity, axis = 1)
+        print(similar_questions)
         sorted_vals = similar_questions.sort_values(by = 'cosine_similarity', ascending = False)
         print(sorted_vals.head())
         return render_template('similarity_report.html', relevant = sorted_vals.head(5)['body_text'].tolist())

@@ -44,6 +44,8 @@ def preprocess_data(data, remove_characters = regular_expression, stopwords_list
 def get_cosine_simlarity(record):
     v1 = record.iloc[0:32]
     v2 = record.iloc[32:64]
+    print(v1)
+    print(v2)
     return spatial.distance.cosine(v1, v2)
 
 def find_common_words(record, col1, col2):
