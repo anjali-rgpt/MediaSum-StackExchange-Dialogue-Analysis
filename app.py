@@ -66,6 +66,7 @@ def locate():
         print("Retrieved database.")
 
         preprocessed_query = dbp.preprocess_data(query)
+        print("Preprocessed:", preprocessed_query)
         temp_vector = pd.DataFrame()
     
         for word in preprocessed_query:
@@ -76,11 +77,10 @@ def locate():
         query_preprocessed_df = pd.DataFrame(columns = ['preprocessed_query'])
         query_preprocessed_df['preprocessed_query'] = [preprocessed_query]*len(db)
         db = pd.concat([db, query_preprocessed_df], axis = 1)
-        print(db.head())
 
         query_df = pd.concat([current_vector]*len(encoded_db), ignore_index = True)
         query_df.columns = ['query_'+ str(col) for col in query_df.columns]
-        print("Query as a dataframe:", query_df.head())
+        # print("Query as a dataframe:", query_df.head())
 
         new_index = np.max(db.post_id) + 1
         print("New index:", new_index)
@@ -100,6 +100,7 @@ def locate():
         db['countq1'] = db['qid1'].apply(lambda x: counts[x])
         db['countq2'] = db['qid2'].apply(lambda x: counts[x])
         print("Built features")
+        print(db.loc[:, ['shared_words']][db['shared_words'].str.len() > 0])
 
         q1 = pd.DataFrame(encoded_db)
         q2 = pd.DataFrame(query_df)
@@ -119,10 +120,21 @@ def locate():
 
         print("Number of relevant questions:", np.sum(db.is_similar))
         similar_questions = db[db['is_similar'] == 1]
+        similar_questions.drop_duplicates(keep = 'first', inplace = True)
+        relevant_encodings = []
         if np.sum(db.is_similar) == 0:
             similar_questions = db
+            relevant_encodings = X.iloc[:, 0:64]
+            print("Relevant encodings:", relevant_encodings.head())
+        else:
+            relevant_encodings = X.iloc[pd.Series(similar_questions.index.values), 0:64]
+            print("Relevant encodings:", relevant_encodings.head())
+        print("Original Similar questions:", similar_questions.head().loc[:, ['shared_words', 'shared_ratio']])
+
+        similar_questions = pd.concat([relevant_encodings,similar_questions], axis = 1)
+        similar_questions = similar_questions[(similar_questions['shared_ratio'] > 0) | (similar_questions['shared_words'].str.len() > 0)]
         similar_questions['cosine_similarity'] = similar_questions.apply(dbp.get_cosine_simlarity, axis = 1)
-        print(similar_questions)
+        print(similar_questions.head())
         sorted_vals = similar_questions.sort_values(by = 'cosine_similarity', ascending = False)
         print(sorted_vals.head())
         return render_template('similarity_report.html', relevant = sorted_vals.head(5)['body_text'].tolist())

@@ -31,7 +31,7 @@
             {% set topics = topic_data[item] %}
             {% for image in topics %}
                 <p>{{ image }}</p>
-                <img src = '{{ url_for('static', filename='outputs/' + image) }}' alt = 'Topic Cloud for Transcript {{ item }}'>
+                <img src = '{{ url_for('static', filename= image).replace('%5C','/') }}' alt = 'Topic Cloud for Transcript {{ item }}'>
             {% endfor %}
         {% endfor %}
     </body>
