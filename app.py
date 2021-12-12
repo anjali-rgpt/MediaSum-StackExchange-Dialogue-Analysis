@@ -41,15 +41,17 @@ def analyse():
         data.reset_index(inplace = True)
         results = {}
         topic_model_results = {}
-
-        for i, row in data.iterrows():
-            results[i] = preprocess.generate_report(row)
+        qa_pairs_list = {}
+        for i, row in data.iterrows(): 
+            results[i], qa_dict = preprocess.generate_report(row)
+            qa_pairs_list[i] = qa_dict
             ctm_transcript, _ = topic_model.ctm_model(row)
             word_images = topic_model.generate_word_cloud(row, ctm_transcript)
             topic_model_results[i] = [os.path.join(app.config['UPLOAD_FOLDER'], url) for url in word_images]
             print(word_images)
+            print(qa_dict.items())
 
-        return render_template("report.html", result_data = results, topic_data = topic_model_results)
+        return render_template("report.html", result_data = results, topic_data = topic_model_results, question_pairs = qa_dict)
 
 @app.route('/locator', methods = ['POST'])
 def locate():
@@ -63,6 +65,8 @@ def locate():
         w2vmodel = FastText.load('models\\fasttextmodel.model')
         print("All models loaded.")
         db, encoded_db, other = dbp.retrieve_db()
+        db['preprocessed_q1'] = db['preprocessed_q1'].apply(lambda x: x.strip('][').split(','))
+        db['preprocessed_q1'] = db['preprocessed_q1'].apply(lambda x: [word.strip(" ' ") for word in x])
         print("Retrieved database.")
 
         preprocessed_query = dbp.preprocess_data(query)
@@ -100,7 +104,11 @@ def locate():
         db['countq1'] = db['qid1'].apply(lambda x: counts[x])
         db['countq2'] = db['qid2'].apply(lambda x: counts[x])
         print("Built features")
-        print(db.loc[:, ['shared_words']][db['shared_words'].str.len() > 0])
+        print(db.loc[15566, ['shared_words', 'preprocessed_q1', 'preprocessed_query']])
+        print(type(db.loc[0, 'preprocessed_q1']))
+        print(type(db.loc[0, 'preprocessed_query']))
+        print(type(db.loc[0, 'preprocessed_q1'][0]))
+        print(type(db.loc[0, 'preprocessed_query'][0]))
 
         q1 = pd.DataFrame(encoded_db)
         q2 = pd.DataFrame(query_df)
@@ -120,7 +128,7 @@ def locate():
 
         print("Number of relevant questions:", np.sum(db.is_similar))
         similar_questions = db[db['is_similar'] == 1]
-        similar_questions.drop_duplicates(keep = 'first', inplace = True)
+        # similar_questions.drop_duplicates(keep = 'first', inplace = True)
         relevant_encodings = []
         if np.sum(db.is_similar) == 0:
             similar_questions = db
@@ -132,12 +140,15 @@ def locate():
         print("Original Similar questions:", similar_questions.head().loc[:, ['shared_words', 'shared_ratio']])
 
         similar_questions = pd.concat([relevant_encodings,similar_questions], axis = 1)
-        similar_questions = similar_questions[(similar_questions['shared_ratio'] > 0) | (similar_questions['shared_words'].str.len() > 0)]
+        similar_questions_new = similar_questions[(similar_questions['shared_ratio'] > 0) | (similar_questions['shared_words'].str.len() > 0)]
+        if similar_questions_new.shape[0] != 0:
+            similar_questions = similar_questions_new
         similar_questions['cosine_similarity'] = similar_questions.apply(dbp.get_cosine_simlarity, axis = 1)
         print(similar_questions.head())
+        similar_questions.drop_duplicates(['cosine_similarity', 'shared_ratio', 'total_words'], inplace = True, keep = 'first')
         sorted_vals = similar_questions.sort_values(by = 'cosine_similarity', ascending = False)
         print(sorted_vals.head())
-        return render_template('similarity_report.html', relevant = sorted_vals.head(5)['body_text'].tolist())
+        return render_template('similarity_report.html', relevant = sorted_vals.head()['body_text'].tolist())
 
 
 if __name__ == "__main__":

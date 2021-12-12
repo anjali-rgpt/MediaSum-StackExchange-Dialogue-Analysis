@@ -425,10 +425,13 @@ def generate_report(data):
         avg_a_length = np.sum(np.array(answer_lengths))/num_qa_pairs
     except:
         print("No answers or questions")
-        
+    qa_pairs = {}
+    if len(questions) == len(answers):  
+        for question in range(len(questions)):
+            qa_pairs[questions[question]] =  answers[question]
 
     return {'channel': channel, 'program': program, 'turns':num_turns, 'words_summary':num_words_summary, 'words_dialog':num_words_dialog, 'speakers':num_speakers,
-    'avg_q':avg_q_length, 'avg_a':avg_a_length, 'num_q':num_qa_pairs}
+    'avg_q':avg_q_length, 'avg_a':avg_a_length, 'num_q':num_qa_pairs}, qa_pairs
 
 
 
