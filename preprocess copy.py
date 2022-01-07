@@ -315,21 +315,18 @@ def generate_ngrams(data, column, n = 2, frequency = 20, best_number = 10, min_p
     if n == 2:
         bigram_collocations = nltk.collocations.BigramAssocMeasures()
         total_list = nltk.collocations.BigramCollocationFinder.from_documents([text for text in data[column]])
-        # print(total_list.ngram_fd.items())
         if len(total_list.ngram_fd.items())>frequency:
             total_list.apply_freq_filter(frequency)        
         scores = total_list.score_ngrams(bigram_collocations.pmi)
     elif n == 3:
         trigram_collocations = nltk.collocations.TrigramAssocMeasures()
         total_list = nltk.collocations.TrigramCollocationFinder.from_documents([text for text in data[column]])
-        # print(total_list.ngram_fd.items())
         if len(total_list.ngram_fd.items())>frequency:
             total_list.apply_freq_filter(frequency) 
         scores = total_list.score_ngrams(trigram_collocations.pmi)
     
     ngram_df = pd.DataFrame(scores, columns = ['ngram', 'pmi'])
     ngram_df = ngram_df.sort_values(by = 'pmi', axis = 0, ascending = False)
-    print(ngram_df.head())
     to_keep = []
 
     if ngram_df.shape[0] == 0:
@@ -369,7 +366,6 @@ def question_count(data, speaker_list = None, special_characters_rm = regular_ex
     is_valid_question = False
     qa_indices = []
     ans_indices = []
-    qa_pairs = {}
     questions = []
     answers = []
 
@@ -379,45 +375,31 @@ def question_count(data, speaker_list = None, special_characters_rm = regular_ex
         print("\nCurrent speaker:", current_speaker)
         if 'host' in current_speaker.lower() or 'cnn' in current_speaker.lower():
             status = 'questioner'
-            questions.append(data[turn])
-            qa_indices.append(turn)
         else:
-            try:
-                if status == 'questioner':
-                    qa_pairs[questions[-1]] = data[turn]
-                else:
-                    qa_pairs[questions[-1]] = qa_pairs[questions[-1]] + str(data[turn])
-                # print(qa_pairs)
-            except:
-                # print("ISSUE")
-                pass
-            finally:
-                status = 'response'
-                answers.append(data[turn])
-                ans_indices.append(turn)
-                print("Status:", status)
-        # sentences = sent_tokenize(data[turn])
+            status = 'response'
+        print("Status:", status)
+        sentences = sent_tokenize(data[turn])
 
-        # for sent in sentences:
-        #     if sent[-1] == '?' and status=='questioner' and not is_valid_question:
-        #         is_valid_question = True
+        for sent in sentences:
+            if sent[-1] == '?' and status=='questioner' and not is_valid_question:
+                is_valid_question = True
             
-        #     elif (status == 'questioner' and is_valid_question) or (status == 'questioner' and turn == 0):
-        #         is_valid_question = False
+            elif (status == 'questioner' and is_valid_question) or (status == 'questioner' and turn == 0):
+                is_valid_question = False
 
-        #     if is_valid_question and status == 'questioner':
-        #         print("Valid question:", sent)
-        #         questions.append(sent)
-        #         qa_indices.append(turn)
-        #         break
-        # print(is_valid_question)
-        # if status == 'response' and is_valid_question:
-        #     print("Answer:", data[turn])
-        #     answers.append(data[turn])
-        #     ans_indices.append(turn)
-        #     is_valid_question = False
+            if is_valid_question and status == 'questioner':
+                print("Valid question:", sent)
+                questions.append(sent)
+                qa_indices.append(turn)
+                break
+        print(is_valid_question)
+        if status == 'response' and is_valid_question:
+            print("Answer:", data[turn])
+            answers.append(data[turn])
+            ans_indices.append(turn)
+            is_valid_question = False
 
-    return questions, answers, qa_indices, ans_indices, qa_pairs
+    return questions, answers, qa_indices, ans_indices
         
 
 def generate_report(data):

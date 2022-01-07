@@ -33,14 +33,6 @@
                 <p>{{ image }}</p>
                 <img src = '{{ url_for('static', filename= image).replace('%5C','/') }}' alt = 'Topic Cloud for Transcript {{ item }}'>
             {% endfor %}
-
-            <h2>Question and answer pairs</h2>
-            {% set qpairs = question_pairs[item] %}
-            {% for q in qpairs.keys() %}
-                <br>
-                <p>Question: {{ q }}</p>
-                <p>Answer: {{ qpairs[q] }}</p>
-            {% endfor %}
         {% endfor %}
     </body>
 </html>

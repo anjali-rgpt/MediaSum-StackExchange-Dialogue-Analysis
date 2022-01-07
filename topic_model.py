@@ -26,16 +26,16 @@ def ngrams(data, column = 'summary'):
     assert column in data.columns, "No column called summary"
 
     count_words = np.sum(data[column].apply(lambda x: preprocess.word_count(x)))
-    # print("Total word count:", count_words)
+    print("Total word count:", count_words)
 
     data['Normalized'] = data[column].apply(lambda x: preprocess.create_pipeline(x, ['ctrc', 'norm', 'tags', 'stop', 'lemm', 'norm'], word_length = 3, contractions = contractions_dict, stopwords = stopword_eng, lemmatizer = lemmatizer_model, relevant_tags = pos_tags, general_category = True))
-    trigrams, _ = preprocess.generate_ngrams(data, 'Normalized', n = 3, frequency = int(count_words*0.01)+1, best_number = 25, stopwords_list = stopword_eng)
+    trigrams, _ = preprocess.generate_ngrams(data, 'Normalized', n = 3, frequency = max(1, int(count_words*0.01)+1), best_number = 25, stopwords_list = stopword_eng)
     if type(trigrams) != type([]):
         trigrams = [' '.join(gram) for gram in trigrams.values]
     else:
         trigrams = []
 
-    bigrams, _ = preprocess.generate_ngrams(data, 'Normalized', n = 2, frequency = int(count_words*0.01)+1, best_number = 25, stopwords_list = stopword_eng)
+    bigrams, _ = preprocess.generate_ngrams(data, 'Normalized', n = 2, frequency = max(1,int(count_words*0.01)+1), best_number = 25, stopwords_list = stopword_eng)
     if type(bigrams) != type([]):
         bigrams = [' '.join(gram) for gram in bigrams.values]
     else:
@@ -69,12 +69,13 @@ def ctm_model(data, column = 'utt'):
     tp = TopicModelDataPreparation("paraphrase-distilroberta-base-v1")
 
     training_dataset = tp.fit(text_for_contextual= to_process, text_for_bow = preprocessed_list)
-    topics_per_document = [2, 3, 4, 5]
+    
+    topics_per_document = [2, 4]
     best_num = 0
     best_coherence = -9999
     scores_lda = []
     for num_topic in topics_per_document:
-        ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=num_topic, num_epochs=20)
+        ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=num_topic, num_epochs=10)
         ctm.fit(training_dataset)
         coh_model = CoherenceCV(topics = ctm.get_topic_lists(), texts = to_dictionary)
         coherence_score = coh_model.score()
@@ -87,6 +88,7 @@ def ctm_model(data, column = 'utt'):
             print("Best coherence so far")
     print("Best number of topics:", best_num)
     ctm = CombinedTM(bow_size=len(tp.vocab), contextual_size=768, n_components=best_num, num_epochs=10)
+    print("Topic distribution for each utterance:", ctm.get_doc_topic_distribution(training_dataset, n_samples = 10))
     ctm.fit(training_dataset)
     return ctm, best_num
 

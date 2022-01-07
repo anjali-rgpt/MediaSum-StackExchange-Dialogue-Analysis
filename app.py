@@ -143,6 +143,8 @@ def locate():
         similar_questions_new = similar_questions[(similar_questions['shared_ratio'] > 0) | (similar_questions['shared_words'].str.len() > 0)]
         if similar_questions_new.shape[0] != 0:
             similar_questions = similar_questions_new
+        else:
+            similar_questions = pd.concat([similar_questions, similar_questions], axis = 0)
         similar_questions['cosine_similarity'] = similar_questions.apply(dbp.get_cosine_simlarity, axis = 1)
         print(similar_questions.head())
         similar_questions.drop_duplicates(['cosine_similarity', 'shared_ratio', 'total_words'], inplace = True, keep = 'first')
