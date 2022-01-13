@@ -80,7 +80,7 @@ def normalize_data(data, keep_nonascii = False, keep_punctuation = False, remove
     if word_length:
         assert type(word_length) == type(5)
         split_data = temp_data.split(' ')
-        select_words = [word for word in split_data if len(word)>=word_length]
+        select_words = [word.strip() for word in split_data if len(word.strip())>=word_length]
         temp_data = ' '.join(split_data)
         
     return temp_data
