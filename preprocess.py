@@ -68,6 +68,7 @@ def normalize_data(data, keep_nonascii = False, keep_punctuation = False, remove
     temp_data = data
     if not keep_nonascii:
         temp_data = temp_data.encode('ascii', errors = 'ignore')
+        temp_data = temp_data.decode('utf-8')
     if not keep_punctuation:
         regular_expression = re.compile('[' + re.escape('!@#$^&*\'()+=-_,./:;<>?"[\\]^_`{|}~')+'0-9\\r\\t\\n]')
         temp_data = regular_expression.sub(' ', temp_data.decode('utf-8'))
