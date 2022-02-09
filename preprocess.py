@@ -71,8 +71,11 @@ def normalize_data(data, keep_nonascii = False, keep_punctuation = False, remove
     if not keep_punctuation:
         regular_expression = re.compile('[' + re.escape('!@#$^&*\'()+=-_,./:;<>?"[\\]^_`{|}~')+'0-9\\r\\t\\n]')
         temp_data = regular_expression.sub(' ', temp_data.decode('utf-8'))
-    if type(temp_data) != type('string'):
-        temp_data = temp_data.decode('utf-8')
+    try:
+        if type(temp_data) != type('string'):
+            temp_data = temp_data.decode('utf-8')
+    except:
+        pass
     if remove_extra_spaces:
         split_data = temp_data.split(' ')
         just_words = [word.strip() for word in split_data if word not in ['','\r','\t',' ']]
